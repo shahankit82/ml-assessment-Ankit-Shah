@@ -43,8 +43,10 @@ Justification:
   Promotions may work differently depending on demographics and competition
   Improves model accuracy by capturing local patterns
 
-**B2. Data and EDA Strategy
-(a) Data Joining and Dataset Design**
+**B2. Data and EDA Strategy**
+
+**(a) Data Joining and Dataset Design**
+
 **Tables**:
   Transactions
   Store attributes
@@ -57,120 +59,107 @@ Justification:
 **Final Dataset Grain**:
    One row = one store per month
 **Aggregations**:
-Total items sold per store per month
-Average basket size
-Total visits (footfall)
-Promotion used in that month
-Competition density (store-level)
+  Total items sold per store per month
+  Average basket size
+  Total visits (footfall)
+  Promotion used in that month
+  Competition density (store-level)
 
 **(b) Exploratory Data Analysis (EDA)****
 
-1. Target Distribution Plot
+**1. Target Distribution Plot**  
+  Check distribution of items_sold
+  Identify skewness or outliers
+  Helps decide if transformation is needed
 
-Check distribution of items_sold
-Identify skewness or outliers
-👉 Helps decide if transformation is needed
+**2. Promotion vs Sales Analysis**
+  Bar chart of average items sold by promotion type
+  Identifies which promotions perform better
 
-2. Promotion vs Sales Analysis
+**3. Correlation Heatmap**
+  Examine relationships between numerical variables
+  Helps detect multicollinearity and useful predictors
 
-Bar chart of average items sold by promotion type
-👉 Identifies which promotions perform better
+**4. Time Series Trend**
+  Plot sales over time
+  Identifies seasonality and trends
 
-3. Correlation Heatmap
+**5. Store Segment Comparison**
+  Compare urban vs rural store performance
+  Helps justify segmented modelling
 
-Examine relationships between numerical variables
-👉 Helps detect multicollinearity and useful predictors
+**(c) Handling Promotion Imbalance**
+**Problem:**
+  80% of data has no promotion
+  Model may learn to ignore promotions
 
-4. Time Series Trend
+**Solutions**:
+  Use balanced sampling or weighting
+  Add a binary feature (promotion vs no promotion)
+  Ensure model sees enough promotion examples
 
-Plot sales over time
-👉 Identifies seasonality and trends
+ **B3. Model Evaluation and Deployment**
 
-5. Store Segment Comparison
+**(a) Train-Test Split and Metrics**
+  **Use time-based split:**
+    Train: First ~2.5 years
+    Test: Last ~6 months
 
-Compare urban vs rural store performance
-👉 Helps justify segmented modelling
-(c) Handling Promotion Imbalance
+  **Why not random split?**
+    Random split mixes past and future data
+    Causes data leakage
+    Unrealistic evaluation
 
-Problem:
+**Evaluation Metrics**:
 
-80% of data has no promotion
-Model may learn to ignore promotions
+**RMSE (Root Mean Squared Error)**:
+    Penalises large errors
+    Useful for understanding big mistakes
+**MAE (Mean Absolute Error)**:
+    Easy to interpret (average error in items sold)
 
-Solutions:
+**Interpretation:**
+  Lower RMSE and MAE = better predictions
+  Helps estimate how far predictions are from actual sales
 
-Use balanced sampling or weighting
-Add a binary feature (promotion vs no promotion)
-Ensure model sees enough promotion examples
-🟦 B3. Model Evaluation and Deployment
-(a) Train-Test Split and Metrics
-Use time-based split:
-Train: First ~2.5 years
-Test: Last ~6 months
+**(b) Explaining Different Promotion Recommendations**
 
-Why not random split?
-
-Random split mixes past and future data
-Causes data leakage
-Unrealistic evaluation
-
-Evaluation Metrics:
-
-RMSE (Root Mean Squared Error):
-Penalises large errors
-Useful for understanding big mistakes
-MAE (Mean Absolute Error):
-Easy to interpret (average error in items sold)
-
-Interpretation:
-
-Lower RMSE and MAE = better predictions
-Helps estimate how far predictions are from actual sales
-(b) Explaining Different Promotion Recommendations
-
-Use feature importance:
+Use **feature importance:**
 
 Steps:
 
-Check which features influenced predictions
-Compare:
-December (likely festival season)
-March (normal period)
+1.Check which features influenced predictions
+2.Compare:
+  December (likely festival season)
+  March (normal period)
 
-Explanation to business:
+**Explanation to business**:
+  December may favour Loyalty Points Bonus due to repeat customers
+  March may favour Flat Discount to attract new buyers
 
-December may favour Loyalty Points Bonus due to repeat customers
-March may favour Flat Discount to attract new buyers
+Shows that seasonality and context drive decisions
 
-👉 Shows that seasonality and context drive decisions
+**(c) Deployment Process**
 
-(c) Deployment Process
+**1. Save Model**
+  Use joblib or pickle to save trained pipeline
 
-1. Save Model
+**2. Monthly Prediction Process**
+  Collect new monthly data
+  Apply same preprocessing pipeline
+  Generate predictions for each store
 
-Use joblib or pickle to save trained pipeline
+**3. Recommendation System**
+  For each store:
+    Try all promotion options
+    Select the one with highest predicted sales
 
-2. Monthly Prediction Process
-
-Collect new monthly data
-Apply same preprocessing pipeline
-Generate predictions for each store
-
-3. Recommendation System
-
-For each store:
-Try all promotion options
-Select the one with highest predicted sales
-
-4. Monitoring
-
+**4. Monitoring**
 Track:
+  Prediction error over time
+  Data drift (changes in input features)
+  Promotion effectiveness changes
 
-Prediction error over time
-Data drift (changes in input features)
-Promotion effectiveness changes
-
-When to retrain:
-
-Performance drops significantly
-Business conditions change (e.g., new competitors)
+**When to retrain:**
+  Performance drops significantly
+  Business conditions change (e.g., new competitors)
